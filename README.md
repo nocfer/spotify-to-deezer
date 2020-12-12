@@ -9,7 +9,7 @@ git clone https://github.com/Fer99n/spotify-to-deezer.git <installation_dir>
 cd <installation_dir>
 
 # create a virtual environment
-python3 -m virtualenv -p python3 venv
+python3 -m venv venv
 
 # activate venv (if you're on Windows this line could differ)
 source venv/bin/activate

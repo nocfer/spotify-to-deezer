@@ -1,4 +1,5 @@
-import os, requests
+import os
+import requests
 from flask import Flask, request, redirect
 
 app = Flask(__name__)
@@ -6,7 +7,9 @@ app = Flask(__name__)
 authorization_base_url = 'https://connect.deezer.com/oauth/auth.php?perms=manage_library'
 token_url = 'https://connect.deezer.com/oauth/access_token.php'
 redirect_uri = 'http://localhost:5000/callback'
-secret = '<SECRET>' 
+
+# Change these with yours
+secret = '<SECRET>'
 app_id = '<APP_ID>'
 
 # use plain HTTP callback
