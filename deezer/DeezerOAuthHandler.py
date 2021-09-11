@@ -1,17 +1,21 @@
-import threading, requests, webbrowser
+import threading, requests, webbrowser, configparser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 server_address = ("127.0.0.1", 5000)
 event_get_token = threading.Event()
+
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 authorization_base_url = (
     "https://connect.deezer.com/oauth/auth.php?perms=manage_library"
 )
 redirect_uri = "http://localhost:5000/callback"
 
-# Change these with yours
-secret = ""
-app_id = ""
+app_id = config["DEEZER"]["DEEZER_APP_ID"]
+secret = config["DEEZER"]["DEEZER_SECRET"]
+
+print(f"{app_id} - {secret}")
 
 auth_URL = f"{authorization_base_url}&app_id={app_id}&redirect_uri={redirect_uri}"
 

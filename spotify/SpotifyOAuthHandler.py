@@ -1,16 +1,21 @@
-import threading, requests, webbrowser
+import threading, requests, webbrowser, configparser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 import base64
 
+
 server_address = ("127.0.0.1", 5000)
 event_get_token = threading.Event()
+
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 redirect_uri = "http://localhost:5000/callback"
 
 # Change these with yours
-secret = ""
-app_id = ""
+secret = config["SPOTIFY"]["SPOTIFY_CLIENT_SECRET"]
+app_id = config["SPOTIFY"]["SPOTIFY_CLIENT_ID"]
+
 access_token = ""
 
 

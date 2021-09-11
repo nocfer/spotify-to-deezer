@@ -1,6 +1,6 @@
 import requests
 from pathlib import Path
-import SpotifyOAuthHandler as handler
+from spotify import SpotifyOAuthHandler as handler
 
 
 class Spotify:
@@ -63,7 +63,7 @@ class Spotify:
         base_url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
 
         # set fields to query from spotify APIs
-        playlist_query = "name, tracks.items(total)"
+        playlist_query = "name, tracks.total"
 
         # set urls
         playlist_url = f"{base_url}?fields={playlist_query}"
@@ -72,8 +72,8 @@ class Spotify:
         r_playlist = requests.get(playlist_url, headers=self.auth_header).json()
 
         self.playlist_name = r_playlist["name"]
-
-        print(f"Playlist name: {self.playlist_name}")
+        self.n_tracks = r_playlist["tracks"]["total"]
+        print(f"Got playlist '{self.playlist_name}' with {self.n_tracks} songs")
 
     def get_playlist_tracks(self, playlist_id: str = None, offset: int = 0):
 
@@ -85,7 +85,7 @@ class Spotify:
             print(f"Retrieving next {offset}")
 
         # set fields to query from spotify APIs
-        tracks_query = "next,total,items(track(artists.name, name))"
+        tracks_query = "next,items(track(artists.name, name))"
 
         # set urls
         tracks_url = f"{base_url}/tracks?offset={offset}&fields={tracks_query}"
@@ -95,7 +95,6 @@ class Spotify:
 
         # save an instance of the retrieved fields
         self.tracks = r_tracks["items"]
-        self.n_tracks = r_tracks["total"]
         self.n_tracks_fetched = self.n_tracks_fetched + len(self.tracks)
 
         if r_tracks["next"]:

@@ -56,6 +56,8 @@ class Deezer:
         for playlist in playlists_array:
             if playlist["title"] == playlist_name:
                 self.deezer_playlist_id = playlist["id"]
+                self.playlist_name = playlist_name
+
                 return
         print(f"POST: {url}")
 
@@ -81,10 +83,14 @@ class Deezer:
         except Exception as e:
             print(e)
 
-    def add_song(self, track_id):
-        req_param = dict(songs=track_id)
-        route = f"playlist/{self.deezer_playlist_id}/tracks"
-        self.post(route=route)
+    def add_song(self, track_ids):
+        id_list = ""
+        for t_id in track_ids:
+            id_list = f"{id_list}{t_id},"
+            # add to deezer playlist
+            r = requests.post(
+                f"{self.base_url}/playlist/{self.deezer_playlist_id}/tracks?songs={id_list}&request_method=post&access_token={self.access_token}"
+            )
 
     def get_user_playlist(self):
         # https://api.deezer.com/user/427723685/playlists
