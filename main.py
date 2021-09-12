@@ -62,12 +62,11 @@ def main():
                     spotify.n_tracks_transfered += 1
 
                 except IndexError:
-                    # if r['data'] is empty it raise IndexError
                     not_found.append(f"{artist} - {title}")
                     pass
+
             if spotify.has_next:
                 offset = offset + 100
-                print(f"NEXT URL:{spotify.next}")
                 spotify.get_playlist_tracks(offset=offset)
         print(
             "Operation completed: {} tracks added to {} Deezer playlist".format(

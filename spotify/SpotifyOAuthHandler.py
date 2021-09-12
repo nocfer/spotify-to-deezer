@@ -1,4 +1,4 @@
-import threading, requests, webbrowser, configparser
+import threading, requests, webbrowser, configparser, datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 import base64
@@ -32,12 +32,9 @@ class SpotifyOAuthHandler(BaseHTTPRequestHandler):
 
     def handle_callback(self):
         code = self.path.split("?")[1].split("=")[1]
-        print(self.path)
-        print(code)
         self.get_token(code)
 
     def write_get_response(self):
-        print("GET request received")
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
@@ -64,10 +61,10 @@ class SpotifyOAuthHandler(BaseHTTPRequestHandler):
 
     def save_token(self, access_token):
         token_file = open("spotify_token.txt", "w")
-        token_file.write(access_token)
+        line = f"{access_token}&{datetime.datetime.now().timestamp()}"
+        token_file.write(line)
         token_file.close()
         event_get_token.set()
-        access_token = access_token
 
 
 def set_req_params(params: dict):
@@ -78,7 +75,7 @@ def set_req_params(params: dict):
     return tmp
 
 
-def main():
+def get_token():
     try:
         server = HTTPServer(server_address, SpotifyOAuthHandler)
         thread1 = threading.Thread(name="server", target=server.serve_forever)
@@ -92,17 +89,14 @@ def main():
         }
 
         url = f"{base_url}{set_req_params(req_params)}"
-
-        print(url)
         webbrowser.open(url, new=0)
 
-        if event_get_token.wait(10):
-            server.shutdown()
-            server.server_close()
-            return access_token
+        event_get_token.wait(10)
+        server.shutdown()
+        server.server_close()
     except KeyboardInterrupt:
         exit()
 
 
 if __name__ == "__main__":
-    main()
+    get_token()

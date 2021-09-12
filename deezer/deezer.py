@@ -1,4 +1,4 @@
-import requests
+import requests, datetime
 from deezer import DeezerOAuthHandler as handler
 from pathlib import Path
 
@@ -12,19 +12,34 @@ class Deezer:
         self.base_url = f"https://api.deezer.com"
         pass
 
+    def read_token(self, token_file_path):
+        token_fp = open(token_file_path, "r")
+        line = token_fp.readline()
+        splits = line.split("&")
+        timestamp = splits[1]
+        saved_at = datetime.datetime.fromtimestamp(float(timestamp))
+        diff = datetime.datetime.now() - saved_at
+        access_token = splits[0]
+        token_fp.close()
+
+        if diff > datetime.timedelta(hours=1):
+            handler.get_token()
+            self.read_token(token_file_path)
+            return None
+
+        return access_token
+
     def login(self):
 
         print("Waiting for login...")
         try:
-            token_file_path = Path("./token.txt")
+            token_file_path = Path("./deezer_token.txt")
 
             if not token_file_path.exists():
-                access_token = handler.get_token()
-                # starting server for oAuth 2.0 authentication process
-            token_fp = token_file_path.open()
-            access_token = token_fp.readline()
-            access_token = access_token.split("&")[0]
-            token_fp.close()
+                handler.get_token()
+
+            access_token = self.read_token(token_file_path)
+
         except FileNotFoundError:
             print("ERROR: Token file not found.")
 
@@ -33,8 +48,6 @@ class Deezer:
         user = requests.get(
             f"https://api.deezer.com/user/me?&access_token={access_token}"
         ).json()
-
-        print(f"user: {user} with token: {access_token}")
 
         # if token is invalid or has expired user need to open again the link
         if "error" in user:
@@ -47,7 +60,7 @@ class Deezer:
         self.access_token = access_token
         self.user_id = user_id
 
-        print("Logged in!\n")
+        print(f"Hi {user['firstname']}, you are now logged in!\n")
 
     def create_playlist(self, playlist_name: str):
         url = f"{self.base_url}/user/{self.user_id}/playlists/?title={playlist_name}&request_method=post&access_token={self.access_token}"

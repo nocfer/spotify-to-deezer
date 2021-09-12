@@ -1,4 +1,4 @@
-import requests
+import requests, datetime
 from pathlib import Path
 from spotify import SpotifyOAuthHandler as handler
 
@@ -17,18 +17,31 @@ class Spotify:
         self.auth_header = None
         pass
 
+    def read_token(self, token_file_path):
+        token_fp = open(token_file_path, "r")
+        line = token_fp.readline()
+        splits = line.split("&")
+        timestamp = splits[1]
+        saved_at = datetime.datetime.fromtimestamp(float(timestamp))
+        diff = datetime.datetime.now() - saved_at
+        access_token = splits[0]
+        token_fp.close()
+
+        if diff > datetime.timedelta(hours=1):
+            handler.get_token()
+            self.read_token(token_file_path)
+            return None
+
+        return access_token
+
     def login(self):
         try:
             token_file_path = Path("./spotify_token.txt")
 
             if not token_file_path.exists():
-                access_token = handler.main()
-                # starting server for oAuth 2.0 authentication process
-            token_fp = token_file_path.open()
-            access_token = token_fp.readline()
-            access_token = access_token.split("&")[0]
-            print(f"Access_token {access_token}")
-            token_fp.close()
+                handler.get_token()
+
+            access_token = self.read_token(token_file_path)
 
         except FileNotFoundError:
             print("ERROR: Token file not found.")
@@ -45,7 +58,6 @@ class Spotify:
             self.playlist_id = url.split(":playlist:")[1]
         else:
             raise Exception("Wrong URL")
-        print(self.playlist_id)
 
     def get_playlist_url(self, url: str = None):
         if not url:
@@ -80,9 +92,6 @@ class Spotify:
         if not playlist_id:
             playlist_id = self.playlist_id
         base_url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
-
-        if offset > 0:
-            print(f"Retrieving next {offset}")
 
         # set fields to query from spotify APIs
         tracks_query = "next,items(track(artists.name, name))"
