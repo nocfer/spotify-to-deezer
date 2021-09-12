@@ -5,18 +5,22 @@ import requests, re
 
 def main():
     try:
+        print("Setup phase...")
         deezer = Deezer()
         spotify = Spotify()
 
         # login
         deezer.login()
+        print("Deezer login successful")
         spotify.login()
+        print("Spotify login successful\n")
 
         # ask for user to input the playlist url
         spotify.get_playlist_url()
 
         # fetch playlist data
         spotify.get_playlist()
+
         spotify.get_playlist_tracks(offset=0)
 
         # create deezer playlist

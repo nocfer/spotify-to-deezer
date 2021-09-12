@@ -3,7 +3,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 import base64
 
-
 server_address = ("127.0.0.1", 5000)
 event_get_token = threading.Event()
 
@@ -28,7 +27,10 @@ class SpotifyOAuthHandler(BaseHTTPRequestHandler):
             return
         except Exception as e:
             event_get_token.set()
-            print(e)
+            print(f"ERROR: {e}")
+    
+    def log_message(self, format, *args):
+        pass
 
     def handle_callback(self):
         code = self.path.split("?")[1].split("=")[1]

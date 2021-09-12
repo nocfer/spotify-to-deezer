@@ -24,14 +24,12 @@ class Deezer:
 
         if diff > datetime.timedelta(hours=1):
             handler.get_token()
-            self.read_token(token_file_path)
-            return None
+            return self.read_token(token_file_path)
 
         return access_token
 
     def login(self):
 
-        print("Waiting for login...")
         try:
             token_file_path = Path("./deezer_token.txt")
 
@@ -39,11 +37,10 @@ class Deezer:
                 handler.get_token()
 
             access_token = self.read_token(token_file_path)
-
+            print(access_token)
         except FileNotFoundError:
             print("ERROR: Token file not found.")
 
-        print(f"retrieved token {access_token}")
         # get user id
         user = requests.get(
             f"https://api.deezer.com/user/me?&access_token={access_token}"
@@ -60,7 +57,7 @@ class Deezer:
         self.access_token = access_token
         self.user_id = user_id
 
-        print(f"Hi {user['firstname']}, you are now logged in!\n")
+        print(f"Hi {user['firstname']}\n")
 
     def create_playlist(self, playlist_name: str):
         url = f"{self.base_url}/user/{self.user_id}/playlists/?title={playlist_name}&request_method=post&access_token={self.access_token}"
@@ -72,29 +69,10 @@ class Deezer:
                 self.playlist_name = playlist_name
 
                 return
-        print(f"POST: {url}")
 
         self.deezer_playlist_id = requests.post(url).json()["id"]
 
         self.playlist_name = playlist_name
-
-    def search_song(self, artist_name: str, track_name: str):
-        try:
-            print(f"searching track {track_name} - {artist_name}")
-
-            path = f"search?q=artist:'{artist_name}' track:'{track_name}'"
-
-            r = self.get(path)
-            if len(r["data"]) == 0:
-                # remove (feat. ...) and - feat from track title
-                track_name = re.sub(pattern="\(.*", repl="", string=track_name)
-                track_name = re.sub(pattern=" - feat.*", repl="", string=track_name)
-
-                # search again
-                r = self.get(route, query_param)
-            return r
-        except Exception as e:
-            print(e)
 
     def add_song(self, track_ids):
         id_list = ""

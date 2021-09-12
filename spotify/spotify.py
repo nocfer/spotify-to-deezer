@@ -29,8 +29,7 @@ class Spotify:
 
         if diff > datetime.timedelta(hours=1):
             handler.get_token()
-            self.read_token(token_file_path)
-            return None
+            return self.read_token(token_file_path)
 
         return access_token
 

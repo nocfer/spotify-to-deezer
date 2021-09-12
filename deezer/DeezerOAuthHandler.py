@@ -51,6 +51,9 @@ class DeezerOAuthHandler(BaseHTTPRequestHandler):
         except Exception as e:
             print(e)
 
+    def log_message(self, format, *args):
+        pass
+
 
 def get_token():
     try:
